@@ -90,9 +90,10 @@ let program =
 let programs =
     [1..(List.length program)]
     |> List.map (modifyProgram program)
-    |> List.map runProgram
-    |> List.filter (fun (x, _) -> x)
-// runProgram program |> printfn "%A"
 
 programs
+|> List.map runProgram
+|> List.filter (fun (x, _) -> x)
+|> List.map (fun (_, y) -> y)
+|> (fun x -> x.Head)
 |> printfn "%A"
