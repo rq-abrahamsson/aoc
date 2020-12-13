@@ -3,21 +3,11 @@ open FSharpPlus
 
 let readLines filePath = System.IO.File.ReadLines(filePath);
 
-// module Seq = 
-//   let generate interval = 
-//     let mutable nextVal = 0
-//     let fn = (fun _ -> 
-//         nextVal <- interval + nextVal
-//         nextVal
-//         )
-//     seq { while true do yield fn() }
-
 let getNextTimeAfterArrival arrival interval =
     Seq.initInfinite (fun x -> x * interval)
     |> Seq.skipWhile (fun x -> x < arrival)
     |> Seq.take 1
     |> Seq.head
-    
 
 let parseBusTimes s =
     s 
