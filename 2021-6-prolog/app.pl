@@ -10,22 +10,36 @@ format_input(Input, RowList) :-
 	split_string(Input, ",", "", RowList).
 
 
-counter(Elem, List, Result) :-
-	counter(Elem, List, 0, Result).
+% counter(Elem, List, Result) :-
+% 	counter(Elem, List, 0, Result).
     
-counter(_Elem, [], Acc, Acc).
-counter(Elem, [Elem|Tail], Acc, Result) :-
-	!,
-	NewAcc is Acc + 1,
-	counter(Elem, Tail, NewAcc, Result).
-counter(Elem, [_Head|Tail], Acc, Result) :-
-	counter(Elem, Tail, Acc, Result).
+% counter(_Elem, [], Acc, Acc).
+% counter(Elem, [Elem|Tail], Acc, Result) :-
+% 	!,
+% 	NewAcc is Acc + 1,
+% 	counter(Elem, Tail, NewAcc, Result).
+% counter(Elem, [_Head|Tail], Acc, Result) :-
+% 	counter(Elem, Tail, Acc, Result).
 
 make_zero(_, 8).
 
 create_eight_list(NumberOfElements, Result) :-
 	length(NewList, NumberOfElements),
 	maplist(make_zero, NewList, Result).
+
+:- use_module(library(clpfd)).
+
+counter(Elem, List, Result) :-
+    counter(Elem, List, 0, Result).
+
+counter(_Elem, [], Acc, Acc).
+counter(Elem, [Elem|Tail], Acc, Result) :-
+    NewAcc #= Acc + 1,
+    counter(Elem, Tail, NewAcc, Result).
+counter(Elem, [Head|Tail], Acc, Result) :-
+    Elem #\= Head,
+    counter(Elem, Tail, Acc, Result).
+
 
 % A
 
