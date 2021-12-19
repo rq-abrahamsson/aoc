@@ -20,10 +20,19 @@ format_input_second_pass(Input, RowList) :-
 get_second_list_element([_Head,Next], Next).
 get_second_list_element([_Head,Next], Next).
 
+get_first_list_element([Head, _], Head).
+get_first_list_element([Head, _], Head).
+
 format_input(Input, Result) :-
 	format_input_rows(Input, Rows),
 	maplist(format_input_first_pass, Rows, SplitRows),
 	maplist(get_second_list_element, SplitRows , OutputValues),
+	maplist(format_input_second_pass, OutputValues, Result).
+
+format_input_patterns(Input, Result) :-
+	format_input_rows(Input, Rows),
+	maplist(format_input_first_pass, Rows, SplitRows),
+	maplist(get_first_list_element, SplitRows , OutputValues),
 	maplist(format_input_second_pass, OutputValues, Result).
 
 is_intersect_length(Str1, Str2, Len) :-
@@ -32,6 +41,46 @@ is_intersect_length(Str1, Str2, Len) :-
 	intersection(Str1L, Str2L, Intersection),
 	length(Intersection, Length),
 	Length #= Len.
+different(X, X) :- !, fail.
+different(_X, _Y).
+
+different(A, A, _, _, _, _, _, _, _) :- !, fail.
+different(A, _, A, _, _, _, _, _, _) :- !, fail.
+different(A, _, _, A, _, _, _, _, _) :- !, fail.
+different(A, _, _, _, A, _, _, _, _) :- !, fail.
+different(A, _, _, _, _, A, _, _, _) :- !, fail.
+different(A, _, _, _, _, _, A, _, _) :- !, fail.
+different(A, _, _, _, _, _, _, A, _) :- !, fail.
+different(A, _, _, _, _, _, _, _, A) :- !, fail.
+different(_, B, B, _, _, _, _, _, _) :- !, fail.
+different(_, B, _, B, _, _, _, _, _) :- !, fail.
+different(_, B, _, _, B, _, _, _, _) :- !, fail.
+different(_, B, _, _, _, B, _, _, _) :- !, fail.
+different(_, B, _, _, _, _, B, _, _) :- !, fail.
+different(_, B, _, _, _, _, _, B, _) :- !, fail.
+different(_, B, _, _, _, _, _, _, B) :- !, fail.
+different(_, _, C, C, _, _, _, _, _) :- !, fail.
+different(_, _, C, _, C, _, _, _, _) :- !, fail.
+different(_, _, C, _, _, C, _, _, _) :- !, fail.
+different(_, _, C, _, _, _, C, _, _) :- !, fail.
+different(_, _, C, _, _, _, _, C, _) :- !, fail.
+different(_, _, C, _, _, _, _, _, C) :- !, fail.
+different(_, _, _, D, D, _, _, _, _) :- !, fail.
+different(_, _, _, D, _, D, _, _, _) :- !, fail.
+different(_, _, _, D, _, _, D, _, _) :- !, fail.
+different(_, _, _, D, _, _, _, D, _) :- !, fail.
+different(_, _, _, D, _, _, _, _, D) :- !, fail.
+different(_, _, _, _, E, E, _, _, _) :- !, fail.
+different(_, _, _, _, E, _, E, _, _) :- !, fail.
+different(_, _, _, _, E, _, _, E, _) :- !, fail.
+different(_, _, _, _, E, _, _, _, E) :- !, fail.
+different(_, _, _, _, _, F, F, _, _) :- !, fail.
+different(_, _, _, _, _, F, _, F, _) :- !, fail.
+different(_, _, _, _, _, F, _, _, F) :- !, fail.
+different(_, _, _, _, _, _, G, G, _) :- !, fail.
+different(_, _, _, _, _, _, G, _, G) :- !, fail.
+different(_, _, _, _, _, _, _, H, H) :- !, fail.
+different(_A, _B, _C, _D, _E, _F, _G, _H, _I).
 
 % A
 
@@ -193,12 +242,45 @@ numbers(Input, [Zero, One, Two, Three, Four, Five, Six, Seven, Eight, Nine]) :-
 	get_five(Input, One, Two, Three, Four, Seven, Five),
 	get_six(Input, One, Two, Three, Four, Five, Seven, Six),
 	get_nine(Input, One, Two, Three, Four, Five, Six, Seven, Nine),
-	get_zero(Input, One, Two, Three, Four, Five, Six, Seven, Nine, Zero).
+	get_zero(Input, One, Two, Three, Four, Five, Six, Seven, Nine, Zero),
+	different(Zero, One, Two, Three, Four, Five, Six, Seven, Nine).
 
-solve_b(Result, Result).
+contains(X, List, Index) :-
+	contains(X, List, 0, Index).
+
+contains(X,[Y|_], Counter, Counter) :-
+	string_codes(X, XL),
+	string_codes(Y, YL),
+	intersection(XL, YL, Z),
+	length(Z, L),
+	length(XL, L),
+	length(YL, L).
+
+contains(X,[_|TAIL], Counter, Index) :-
+	CountPlus is Counter + 1,
+	contains(X,TAIL, CountPlus, Index).
+
+
+get_number_value(DeterminedNumbers, NumberToGet, I) :-
+	contains(NumberToGet, DeterminedNumbers, I).
+
+get_number_values(DeterminedNumbers, NumbersToGet, I) :-
+	maplist(get_number_value(DeterminedNumbers), NumbersToGet, I).
+
+to_numbers(A, Result) :-
+	maplist(atomics_to_string, A, S),
+	maplist(number_string,Result, S).
+
+
+solve_b(InputPatters, InputAnswers, Result) :-
+	maplist(numbers, InputPatters, CorrectNumbers),
+	maplist(get_number_values, CorrectNumbers, InputAnswers, OutList),
+	to_numbers(OutList, Numbers),
+	sum_list(Numbers, Result).
 
 run_b :-
 	read_file_to_string("./input.txt", Input, []),
-	format_input(Input, FormattedInput),
-	solve_b(FormattedInput, Result),
+	format_input(Input, FormattedInputAnswers),
+	format_input_patterns(Input, FormattedInputPatters),
+	solve_b(FormattedInputPatters, FormattedInputAnswers, Result),
 	write(Result).
